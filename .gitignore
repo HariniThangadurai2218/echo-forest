@@ -1,5 +1,20 @@
+# AI virtual environment
 ai/.venv/
+
+# AI datasets
 ai/data/raw/
 ai/data/processed/
+
+# Python
 __pycache__/
-*.pyc
+*.py[cod]
+*.pyo
+
+# Environment variables
+.env
+
+# IDE
+.vscode/
+
+# macOS
+.DS_Store

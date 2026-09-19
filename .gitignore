@@ -1,0 +1,5 @@
+ai/.venv/
+ai/data/raw/
+ai/data/processed/
+__pycache__/
+*.pyc

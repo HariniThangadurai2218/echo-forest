@@ -40,3 +40,59 @@ def create_event(
         **new_event.__dict__,
         "alert": alert
     }
+
+@router.get("/", response_model=list[EventResponse])
+def get_events(
+    db: Session = Depends(get_db)
+):
+    events = (
+        db.query(AcousticEvent)
+        .order_by(AcousticEvent.timestamp.desc())
+        .all()
+    )
+
+    result = []
+
+    for event in events:
+        alert = generate_alert(
+            event.event_type,
+            event.confidence
+        )
+
+        result.append({
+            **event.__dict__,
+            "alert": alert
+        })
+
+    return result
+@router.get("/alerts")
+def get_alerts(
+    db: Session = Depends(get_db)
+):
+    events = (
+        db.query(AcousticEvent)
+        .order_by(AcousticEvent.timestamp.desc())
+        .all()
+    )
+
+    alerts = []
+
+    for event in events:
+        alert = generate_alert(
+            event.event_type,
+            event.confidence
+        )
+
+        alerts.append({
+            "event_id": event.id,
+            "event_type": event.event_type,
+            "confidence": event.confidence,
+            "latitude": event.latitude,
+            "longitude": event.longitude,
+            "severity": event.severity,
+            "status": event.status,
+            "timestamp": event.timestamp,
+            **alert
+        })
+
+    return alerts

@@ -1,9 +1,13 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from backend.database import get_db
 from backend.models.event import AcousticEvent
-from backend.schemas.event import EventCreate, EventResponse
+from backend.schemas.event import (
+    EventCreate,
+    EventResponse,
+    EventStatusUpdate
+)
 from backend.services.alert_service import generate_alert
 
 
@@ -96,3 +100,35 @@ def get_alerts(
         })
 
     return alerts
+@router.patch("/{event_id}/status", response_model=EventResponse)
+def update_event_status(
+    event_id: int,
+    status_update: EventStatusUpdate,
+    db: Session = Depends(get_db)
+):
+    event = (
+        db.query(AcousticEvent)
+        .filter(AcousticEvent.id == event_id)
+        .first()
+    )
+
+    if not event:
+        raise HTTPException(
+            status_code=404,
+            detail="Event not found"
+        )
+
+    event.status = status_update.status
+
+    db.commit()
+    db.refresh(event)
+
+    alert = generate_alert(
+        event.event_type,
+        event.confidence
+    )
+
+    return {
+        **event.__dict__,
+        "alert": alert
+    }

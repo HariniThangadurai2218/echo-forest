@@ -27,3 +27,6 @@ class EventResponse(EventCreate):
     model_config = {
         "from_attributes": True
     }
+
+class EventStatusUpdate(BaseModel):
+    status: str = Field(..., pattern="^(NEW|ACKNOWLEDGED|RESOLVED)$")
